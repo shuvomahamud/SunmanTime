@@ -1,0 +1,7 @@
+{
+  "description": "Business-approved cleanup rules discovered during the legacy audit.",
+  "userMerges": {
+    "14": 30
+  },
+  "excludedEntryIds": [1441, 5702]
+}

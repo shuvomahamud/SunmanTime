@@ -1,0 +1,6 @@
+{
+  "description": "Map a legacy Django user ID to a unique login email only when migrate:check reports a collision.",
+  "overrides": {
+    "123": "employee+unique@example.com"
+  }
+}
