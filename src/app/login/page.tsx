@@ -44,12 +44,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </form>
         <div className="auth-links">
           <Link href="/forgot-password">Forgot password?</Link>
-          {process.env.ALLOW_PUBLIC_SIGNUP === "true" ? (
-            <Link href="/register">Create account</Link>
-          ) : null}
         </div>
       </div>
     </AuthShell>
   );
 }
-

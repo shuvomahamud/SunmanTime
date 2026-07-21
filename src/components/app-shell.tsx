@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Clock3, Download, LogOut } from "lucide-react";
+import { BarChart3, Clock3, Download, LogOut, UsersRound } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import type { Profile } from "@/lib/types";
 
@@ -36,6 +36,10 @@ export function AppShell({
                 <BarChart3 size={18} />
                 Reports
               </Link>
+              <Link href="/employees">
+                <UsersRound size={18} />
+                Employees
+              </Link>
               <Link href="/api/reports/excel">
                 <Download size={18} />
                 Export month
@@ -66,4 +70,3 @@ export function AppShell({
     </div>
   );
 }
-

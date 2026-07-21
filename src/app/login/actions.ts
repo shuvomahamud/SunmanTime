@@ -3,27 +3,12 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getDb } from "@/lib/db";
-import { profiles } from "@/lib/db/schema";
 import { getNeonAuth } from "@/lib/neon-auth/server";
 
 const loginSchema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(1),
   next: z.string().optional(),
-});
-
-const registrationSchema = z.object({
-  firstName: z.string().trim().min(1).max(100),
-  lastName: z.string().trim().min(1).max(100),
-  username: z
-    .string()
-    .trim()
-    .min(2)
-    .max(100)
-    .regex(/^[a-zA-Z0-9._-]+$/),
-  email: z.string().trim().email(),
-  password: z.string().min(8).max(128),
 });
 
 function messageUrl(path: string, kind: "error" | "message", value: string) {
@@ -60,62 +45,6 @@ export async function login(formData: FormData) {
   }
 
   redirect(safeNext(parsed.data.next));
-}
-
-export async function register(formData: FormData) {
-  if (process.env.ALLOW_PUBLIC_SIGNUP !== "true") {
-    redirect(
-      messageUrl(
-        "/register",
-        "error",
-        "Registration is currently invite-only. Contact an administrator.",
-      ),
-    );
-  }
-
-  const parsed = registrationSchema.safeParse({
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    username: formData.get("username"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!parsed.success) {
-    redirect(messageUrl("/register", "error", "Check every field and try again."));
-  }
-
-  const fullName = `${parsed.data.firstName} ${parsed.data.lastName}`.trim();
-  const { data, error } = await getNeonAuth().signUp.email({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    name: fullName,
-    callbackURL: "/",
-  });
-
-  if (error || !data?.user) {
-    redirect(messageUrl("/register", "error", error?.message ?? "Account creation failed."));
-  }
-
-  try {
-    await getDb().insert(profiles).values({
-      id: data.user.id,
-      username: parsed.data.username,
-      email: parsed.data.email,
-      first_name: parsed.data.firstName,
-      last_name: parsed.data.lastName,
-    });
-  } catch {
-    redirect(
-      messageUrl(
-        "/register",
-        "error",
-        "The account was created, but its employee profile needs administrator review.",
-      ),
-    );
-  }
-
-  redirect(messageUrl("/login", "message", "Check your email to confirm your account."));
 }
 
 export async function requestPasswordReset(formData: FormData) {

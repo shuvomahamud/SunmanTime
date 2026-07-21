@@ -197,6 +197,24 @@ if (conflicts.length) {
     }
 
     authIdByLegacyId.set(Number(user.id), authId);
+    if (user.is_superuser) {
+      execFileSync(
+        "npx",
+        [
+          "neonctl@latest",
+          "neon-auth",
+          "user",
+          "set-role",
+          String(authId),
+          "--roles",
+          "admin",
+          "--output",
+          "json",
+          "--no-analytics",
+        ],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+    }
     await sql`
       insert into public.profiles (
         id, legacy_user_id, username, email, legacy_email,

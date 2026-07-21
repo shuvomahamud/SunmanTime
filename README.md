@@ -13,8 +13,8 @@ and is designed for Vercel.
 - Neon Auth's shared sender delivers authentication emails; the application does
   not use a separate email service.
 
-Public registration is disabled by default. Set `ALLOW_PUBLIC_SIGNUP=true` only
-if open employee registration is genuinely desired.
+Public registration is disabled in both the application and Neon Auth.
+Administrators invite employees from the protected `/employees` page.
 
 ## Features translated from Django
 
@@ -23,6 +23,7 @@ if open employee registration is genuinely desired.
 - Employee monthly attendance history and hour totals
 - Administrator daily attendance dashboard
 - Administrator monthly report and `.xlsx` export
+- Administrator-only employee invitations and password-setup link resends
 - America/New_York workday boundaries
 - Preserved Django IDs for audit and migration verification
 
@@ -105,7 +106,6 @@ variables into Preview and Production. Add these application variables:
 
 - `NEON_AUTH_COOKIE_SECRET` — unique random value per environment
 - `NEXT_PUBLIC_SITE_URL` — the environment’s canonical URL
-- `ALLOW_PUBLIC_SIGNUP=false`
 
 Add every production and preview domain that may receive auth callbacks to
 Neon Auth’s trusted domains. Do not add migration-only employee files to Vercel.

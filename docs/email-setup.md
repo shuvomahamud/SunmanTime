@@ -20,7 +20,6 @@ DATABASE_URL
 NEON_AUTH_BASE_URL
 NEON_AUTH_COOKIE_SECRET
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-ALLOW_PUBLIC_SIGNUP=false
 ```
 
 The reset flow is:
@@ -49,6 +48,7 @@ Before sending employee invitations or migration resets:
 ## Cutover safety
 
 - Import and validate counts before sending any reset links.
-- Keep `ALLOW_PUBLIC_SIGNUP=false` for this employee-only application.
+- Keep new-user signup disabled in Neon Auth; administrators create employees
+  from the protected `/employees` page.
 - Do not log tokens, passwords, or connection strings.
 - Rotate any credential that appears in terminal output or deployment logs.

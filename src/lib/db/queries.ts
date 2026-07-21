@@ -8,6 +8,7 @@ import {
   gte,
   isNull,
   lte,
+  or,
 } from "drizzle-orm";
 import type { Profile, TimeEntry, TimeEntryWithProfile } from "@/lib/types";
 import { getDb } from "./index";
@@ -44,6 +45,28 @@ export async function listActiveProfiles() {
     .from(profiles)
     .where(eq(profiles.is_active, true))
     .orderBy(asc(profiles.first_name), asc(profiles.last_name))) as Profile[];
+}
+
+export async function listProfiles() {
+  return (await getDb()
+    .select()
+    .from(profiles)
+    .orderBy(
+      asc(profiles.first_name),
+      asc(profiles.last_name),
+      asc(profiles.email),
+    )) as Profile[];
+}
+
+export async function findProfileByIdentity(email: string, username: string) {
+  const [profile] = await getDb()
+    .select()
+    .from(profiles)
+    .where(
+      or(eq(profiles.email, email), eq(profiles.username, username)),
+    )
+    .limit(1);
+  return profile as Profile | undefined;
 }
 
 export async function listTodayEntries(workDate: string) {
