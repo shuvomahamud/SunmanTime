@@ -196,7 +196,8 @@ a {
 }
 
 .form-stack input,
-.report-toolbar input {
+.report-toolbar input,
+.report-toolbar select {
   width: 100%;
   min-height: 3.1rem;
   border: 1px solid var(--line);
@@ -209,7 +210,8 @@ a {
 }
 
 .form-stack input:focus,
-.report-toolbar input:focus {
+.report-toolbar input:focus,
+.report-toolbar select:focus {
   border-color: var(--forest-light);
   box-shadow: 0 0 0 4px rgba(37, 93, 78, 0.1);
 }
@@ -591,7 +593,8 @@ a {
   gap: 0.75rem;
 }
 
-.report-toolbar input {
+.report-toolbar input,
+.report-toolbar select {
   min-height: 2.75rem;
 }
 

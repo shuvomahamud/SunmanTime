@@ -13,10 +13,14 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const month = normalizeMonth(url.searchParams.get("month") ?? undefined);
+  const selectedUser = url.searchParams.get("user");
   const bounds = monthBounds(month);
   await requireAdmin();
   const entries = await listReportEntries(bounds.start, bounds.end, true);
-  const userReports = groupReportEntries(entries);
+  const allUserReports = groupReportEntries(entries);
+  const userReports = selectedUser
+    ? allUserReports.filter((report) => report.key === selectedUser)
+    : allUserReports;
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Sunman Time";
   workbook.created = new Date();

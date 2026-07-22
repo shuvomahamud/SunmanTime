@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; user?: string }>;
 }) {
   const params = await searchParams;
   const month = normalizeMonth(params.month);
@@ -21,10 +21,22 @@ export default async function ReportsPage({
   const { profile } = await requireAdmin();
   const entries = await listReportEntries(bounds.start, bounds.end);
   const userReports = groupReportEntries(entries);
-  const totalMinutes = userReports.reduce(
+  const selectedUser = userReports.some((report) => report.key === params.user)
+    ? params.user
+    : "";
+  const visibleReports = selectedUser
+    ? userReports.filter((report) => report.key === selectedUser)
+    : userReports;
+  const visibleEntries = visibleReports.reduce(
+    (total, report) => total + report.entries.length,
+    0,
+  );
+  const totalMinutes = visibleReports.reduce(
     (total, report) => total + report.totalMinutes,
     0,
   );
+  const exportParams = new URLSearchParams({ month });
+  if (selectedUser) exportParams.set("user", selectedUser);
 
   return (
     <AppShell profile={profile}>
@@ -33,9 +45,12 @@ export default async function ReportsPage({
         title="Monthly attendance"
         description="Review attendance history and export a payroll-ready workbook."
         action={
-          <Link className="button-primary link-button" href={`/api/reports/excel?month=${month}`}>
+          <Link
+            className="button-primary link-button"
+            href={`/api/reports/excel?${exportParams.toString()}`}
+          >
             <Download size={17} />
-            Export Excel
+            Export {selectedUser ? "user" : "all users"}
           </Link>
         }
       />
@@ -43,19 +58,28 @@ export default async function ReportsPage({
         <form method="get">
           <label htmlFor="month">Reporting month</label>
           <input id="month" name="month" type="month" defaultValue={month} />
+          <label htmlFor="user">Employee</label>
+          <select id="user" name="user" defaultValue={selectedUser}>
+            <option value="">All users</option>
+            {userReports.map((report) => (
+              <option key={report.key} value={report.key}>
+                {report.name}
+              </option>
+            ))}
+          </select>
           <button className="button-secondary" type="submit">View report</button>
         </form>
         <div className="report-total">
           <span>Total recorded time</span>
           <strong>{formatMinutesAsClock(totalMinutes)}</strong>
           <small>
-            {userReports.length} employees · {entries.length} entries · {bounds.label}
+            {visibleReports.length} employees · {visibleEntries} entries · {bounds.label}
           </small>
         </div>
       </section>
-      {userReports.length ? (
+      {visibleReports.length ? (
         <div className="report-user-list">
-          {userReports.map((report) => (
+          {visibleReports.map((report) => (
             <section className="panel" key={report.key}>
               <div className="panel-heading report-user-heading">
                 <div>
