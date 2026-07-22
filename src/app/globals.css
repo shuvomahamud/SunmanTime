@@ -494,7 +494,7 @@ a {
 }
 
 .employee-form {
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .form-help {
@@ -506,6 +506,63 @@ a {
 
 .employee-list-panel {
   min-width: 0;
+}
+
+.invite-dialog {
+  width: min(calc(100% - 2rem), 36rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  padding: 1.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(19, 35, 31, 0.25);
+}
+
+.invite-dialog::backdrop {
+  background: rgba(19, 35, 31, 0.58);
+  backdrop-filter: blur(3px);
+}
+
+.invite-dialog-header,
+.invite-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.invite-dialog-header {
+  align-items: flex-start;
+}
+
+.invite-dialog-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.dialog-close {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.dialog-close:hover {
+  color: var(--ink);
+}
+
+.invite-dialog-actions {
+  justify-content: flex-end;
+  margin-top: 0.25rem;
 }
 
 .table-action {

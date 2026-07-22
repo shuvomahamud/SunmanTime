@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -131,37 +132,42 @@ export async function inviteEmployee(formData: FormData) {
     employeesUrl(
       emailError ? "error" : "message",
       emailError
-        ? "The employee was created, but the setup email failed. Use Send setup link to retry."
+        ? "The employee was created, but the setup email failed. They can request a new link from Forgot password."
         : `Invitation sent to ${parsed.data.email}.`,
     ),
   );
 }
 
-export async function sendEmployeeSetupLink(formData: FormData) {
+export async function setEmployeeActive(formData: FormData) {
   await requireAdmin();
 
   const userId = z.string().uuid().safeParse(formData.get("userId"));
-  if (!userId.success) {
+  const isActive = z.enum(["true", "false"]).safeParse(formData.get("isActive"));
+  if (!userId.success || !isActive.success) {
     redirect(employeesUrl("error", "The selected employee is invalid."));
   }
 
   const profile = await findProfile(userId.data);
-  if (!profile?.is_active) {
-    redirect(employeesUrl("error", "That employee account is not active."));
+  if (!profile || profile.role !== "employee") {
+    redirect(employeesUrl("error", "Only employee access can be changed here."));
   }
 
-  const origin = await applicationOrigin();
-  const { error } = await getNeonAuth().requestPasswordReset({
-    email: profile.email,
-    redirectTo: `${origin}/reset-password`,
-  });
+  const activate = isActive.data === "true";
+  await getDb()
+    .update(profiles)
+    .set({
+      is_active: activate,
+      updated_at: new Date().toISOString(),
+    })
+    .where(eq(profiles.id, profile.id));
 
+  revalidatePath("/employees");
   redirect(
     employeesUrl(
-      error ? "error" : "message",
-      error
-        ? "Neon could not send the setup link. Try again shortly."
-        : `A password-setup link was sent to ${profile.email}.`,
+      "message",
+      `${profile.first_name || profile.username} is now ${
+        activate ? "active" : "inactive"
+      }.`,
     ),
   );
 }
