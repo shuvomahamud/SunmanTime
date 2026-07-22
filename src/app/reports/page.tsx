@@ -6,6 +6,7 @@ import { TimeTable } from "@/components/time-table";
 import { requireAdmin } from "@/lib/auth";
 import { listReportEntries } from "@/lib/db/queries";
 import { monthBounds, normalizeMonth } from "@/lib/dates";
+import { formatMinutesAsClock, groupReportEntries } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +20,11 @@ export default async function ReportsPage({
   const bounds = monthBounds(month);
   const { profile } = await requireAdmin();
   const entries = await listReportEntries(bounds.start, bounds.end);
-  const totalMinutes = entries.reduce((total, entry) => {
-    if (!entry.end_time) return total;
-    const duration =
-      new Date(entry.end_time).getTime() - new Date(entry.start_time).getTime();
-    return duration > 0 ? total + Math.floor(duration / 60_000) : total;
-  }, 0);
+  const userReports = groupReportEntries(entries);
+  const totalMinutes = userReports.reduce(
+    (total, report) => total + report.totalMinutes,
+    0,
+  );
 
   return (
     <AppShell profile={profile}>
@@ -47,19 +47,35 @@ export default async function ReportsPage({
         </form>
         <div className="report-total">
           <span>Total recorded time</span>
-          <strong>{Math.floor(totalMinutes / 60)}h {totalMinutes % 60}m</strong>
-          <small>{entries.length} entries · {bounds.label}</small>
+          <strong>{formatMinutesAsClock(totalMinutes)}</strong>
+          <small>
+            {userReports.length} employees · {entries.length} entries · {bounds.label}
+          </small>
         </div>
       </section>
-      <section className="panel">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">{bounds.label}</p>
-            <h2>All employee entries</h2>
-          </div>
+      {userReports.length ? (
+        <div className="report-user-list">
+          {userReports.map((report) => (
+            <section className="panel" key={report.key}>
+              <div className="panel-heading report-user-heading">
+                <div>
+                  <p className="eyebrow">{report.email || "Employee report"}</p>
+                  <h2>{report.name}</h2>
+                </div>
+                <div className="report-user-total">
+                  <strong>{formatMinutesAsClock(report.totalMinutes)}</strong>
+                  <small>{report.entries.length} entries</small>
+                </div>
+              </div>
+              <TimeTable entries={report.entries} />
+            </section>
+          ))}
         </div>
-        <TimeTable entries={entries} showEmployee />
-      </section>
+      ) : (
+        <section className="panel">
+          <div className="empty-state">No attendance records found for {bounds.label}.</div>
+        </section>
+      )}
     </AppShell>
   );
 }

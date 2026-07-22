@@ -612,6 +612,34 @@ a {
   font-size: 1.35rem;
 }
 
+.report-user-list {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.report-user-heading {
+  border-bottom: 1px solid #e9eeeb;
+}
+
+.report-user-total {
+  text-align: right;
+}
+
+.report-user-total strong,
+.report-user-total small {
+  display: block;
+}
+
+.report-user-total strong {
+  font-size: 1.15rem;
+}
+
+.report-user-total small {
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 @media (max-width: 900px) {
   .auth-shell {
     grid-template-columns: 1fr;
@@ -693,6 +721,10 @@ a {
 
   .report-total {
     text-align: left;
+  }
+
+  .report-user-heading {
+    align-items: flex-start;
   }
 
   .form-grid {
